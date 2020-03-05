@@ -1,6 +1,9 @@
 <template>
     <modal @modal-close="close">
-        <div class="containerTty bg-white rounded shadow p-4 m-2 max-w-3xl max-h-screen overflow-y-scroll" style="width: calc(150vh - 16rem); height: calc(100vh - 16rem); select-text">
+        <div
+            class="containerTty bg-white rounded shadow p-4 m-2 max-w-3xl max-h-screen overflow-y-scroll select-text"
+            style="width: calc(150vh - 16rem); height: calc(100vh - 16rem);"
+        >
             <div class="box box-1">
                 <div class="mb-1">
                     <h1>{{ command.name }}</h1>
@@ -26,8 +29,7 @@
                         :key="option.name"
                         :option="option"
                         @toggle-selected-option="toggle"
-                    >
-                    </option-button>
+                    ></option-button>
                 </div>
 
                 <div class="mb-4 text-primary text-lg">
@@ -43,14 +45,11 @@
                 <div class="mb-4 text-primary text-sm">
                     <p>
                         php artisan {{ _compiledCommand }}
-
                         <span>
                             <button
                                 @click="run"
                                 class="label bg-danger text-white hover:bg-danger cursor-pointer p-1 rounded"
-                            >
-                                run >>
-                            </button>
+                            >run >></button>
                         </span>
                     </p>
                 </div>
@@ -78,7 +77,7 @@ export default {
         return {
             console: '',
             running: false,
-        }
+        };
     },
 
     computed: {
@@ -89,92 +88,78 @@ export default {
                 _.join(this._compiledSelectedOptions, ' ') +
                 ' ' +
                 _.join(this._compiledArguments, ' ')
-            )
+            );
         },
 
         _compiledSelectedOptions() {
-            return _.map(
-                _.filter(this.command.options, option => option.selected),
-                option => {
-                    return (
-                        option.option + (option.value ? '=' + option.value : '')
-                    )
-                },
-            )
+            return _.map(_.filter(this.command.options, option => option.selected), option => {
+                return option.option + (option.value ? '=' + option.value : '');
+            });
         },
 
         _compiledArguments() {
             return _.map(
                 this.command.arguments,
                 argument =>
-                    (argument.value == 'null' ||
-                    argument.value == null ||
-                    !argument.value
+                    (argument.value == 'null' || argument.value == null || !argument.value
                         ? ''
-                        : argument.value) + ' ',
-            )
+                        : argument.value) + ' '
+            );
         },
     },
 
     methods: {
         close() {
-            this.clearRun()
+            this.clearRun();
 
-            this.$emit('close')
+            this.$emit('close');
 
-            this.running = false
+            this.running = false;
         },
 
         toggle(elementName) {
             this.$set(
                 this.command.options[elementName],
                 'selected',
-                !this.command.options[elementName].selected,
-            )
+                !this.command.options[elementName].selected
+            );
         },
 
         argumentUpdated(argument, value) {
-            this.command.arguments[argument.name].value = value
+            this.command.arguments[argument.name].value = value;
         },
 
         run() {
-            this.running = true
+            this.running = true;
 
             Nova.request()
-                .get(
-                    '/nova-vendor/pragmarx/artisan-tool/artisan-tool-run/' +
-                        this._compiledCommand,
-                )
+                .get('/nova-vendor/pragmarx/artisan-tool/artisan-tool-run/' + this._compiledCommand)
                 .then(({ data }) => {
-                    this.commands = data
+                    this.commands = data;
 
-                    this.readConsole()
-                })
+                    this.readConsole();
+                });
         },
 
         clearRun() {
-            Nova.request().get(
-                '/nova-vendor/pragmarx/artisan-tool/artisan-tool-clear-tty',
-            )
+            Nova.request().get('/nova-vendor/pragmarx/artisan-tool/artisan-tool-clear-tty');
         },
 
         readConsole() {
             window.setInterval(() => {
                 if (this.running) {
                     Nova.request()
-                        .get(
-                            '/nova-vendor/pragmarx/artisan-tool/artisan-tool-console-buffer',
-                        )
+                        .get('/nova-vendor/pragmarx/artisan-tool/artisan-tool-console-buffer')
                         .then(({ data }) => {
-                            this.console = data
-                        })
+                            this.console = data;
+                        });
                 }
-            }, 1000)
+            }, 1000);
         },
     },
 
     mounted() {
-        this.readConsole()
+        this.readConsole();
     },
-}
+};
 </script>
